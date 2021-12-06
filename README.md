@@ -1,4 +1,4 @@
-# Sprach-o-mat
+# Sprach-O-Mat
 
 This tool performs a diagnosis of the level of complexity of German texts. It provides 4 different diagnostics:
 

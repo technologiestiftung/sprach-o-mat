@@ -13,4 +13,6 @@ This tool performs a diagnosis of the level of complexity of German texts. It pr
 
 - dictionary_a1a2b1_onlystems.csv: A csv file with all the vocabulary terms from the Goethe Institut based on the PDF documents in the "Dictionaries" folders. These were converted to csv using pdftools::pdf_ocr_text. 
 
-- Dictionaries: PDF files from the Goethe Institut. Goethe-Zertifikat_A1_Wortliste.pdf (Words list A1), Goethe-Zertifikat_A2_Wortliste.pdf (Words list A2), Goethe-Zertifikat_B1_Wortliste.pdf (Words list B1). 
+- Dictionaries: PDF files from the Goethe Institut. Goethe-Zertifikat_A1_Wortliste.pdf (Words list A1), Goethe-Zertifikat_A2_Wortliste.pdf (Words list A2), Goethe-Zertifikat_B1_Wortliste.pdf (Words list B1). These are openly available here: https://www.sprachenzentrum.fu-berlin.de/slz/sprachen-links/deutsch/wortschatz/index.html
+
+

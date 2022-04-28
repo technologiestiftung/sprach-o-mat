@@ -1,7 +1,7 @@
 # Sprach-O-Mat
 
 This tool performs a diagnosis of the level of complexity of German texts. 
-It is available here: [https://evelynebrie.shinyapps.io/Sprach-O-Mat/](https://evelynebrie.shinyapps.io/Sprach-O-Mat/)
+It is available here: [https://evelynebrie.shinyapps.io/Sprach-O-Mat/](https://evelynebrie.shinyapps.io/Sprach-O-Mat/). 
 This is a prototype under construction.
 
 The Tool provides 4 different diagnostics:

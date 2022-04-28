@@ -1,0 +1,671 @@
+---
+title: "Sprach-O-Mat"
+author: " "
+date: " "
+output: html_document
+runtime: shiny
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#dict_stems <- read.csv("/Users/evelynebrie/Dropbox/CityLab/Projects/TextSimplification/Website2/dictionary_a1a2b1_onlystems.csv")
+dict_stems <- read.csv("/Users/lisastubert/Desktop/dictionary_a1a2b1_onlystems.csv")
+```
+
+-----
+  
+```{r, echo=F, message=FALSE}
+library(shiny)
+library(dplyr)
+library(striprtf)
+library(stringr)
+library(pdftools)
+library(doBy)
+library(corpus)
+library(shinyWidgets)
+
+# 
+# ui <- fluidPage(
+#   textAreaInput("caption", "Text", value="Insert your text here",width="100%",height =200),
+#   verbatimTextOutput("value")
+# )
+
+
+
+ui <- shinyUI(fluidPage(tags$head(tags$style(HTML(" .selectize-input{height: 20px; width: 1000px; font-size: 15pt;                         margin-bottom: 10px; margin-top: 10px} ")) ),
+                        tags$head(tags$style("#value{
+                                 font-size: 16px;
+                                 width: 100%;
+                                 height: 100%
+                                 padding: 10px; 
+                                 padding-bottom: 10px; 
+                                 padding-top: 10px; 
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 border: 4px solid rgba(246,76,114,0.4);
+                                 margin-top: 15px;
+                                 border-radius: 5px;}")),
+                        tags$head(
+                          tags$style(
+                            "body {overflow-x: hidden; overflow-y: auto}"
+                          )
+                        ),tags$head(
+                          tags$style(HTML("
+                      .sidebar { height: 90vh; overflow-y: hidden; }
+                      " )
+                          )
+                        ),
+                        tags$head(tags$style("#value2{
+                                 font-size: 16px;
+                                 width: 100%;
+                                 height: 100%
+                                 padding: 10px; 
+                                 padding-bottom: 10px; 
+                                 padding-top: 10px; 
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 border: 4px solid rgba(246,76,114,0.4);
+                                 margin-top: 15px;
+                                 border-radius: 5px;}")),
+                        tags$head(tags$style("#value3{
+                                 font-size: 16px;
+                                 width: 100%;
+                                 height: 100%
+                                 padding: 10px; 
+                                 padding-bottom: 10px; 
+                                 padding-top: 10px; 
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 border: 4px solid rgba(246,76,114,0.4);
+                                 margin-top: 15px;
+                                 border-radius: 5px;}")),
+                        tags$head(tags$style("#value4{
+                                 font-size: 16px;
+                                 width: 100%;
+                                 height: 100%
+                                 padding: 10px; 
+                                 padding-bottom: 10px; 
+                                 padding-top: 10px; 
+                                 padding-left: 10px; 
+                                 padding-right: 10px; 
+                                 border: 4px solid rgba(246,76,114,0.4);
+                                 margin-top: 15px;
+                                 border-radius: 5px;}")),
+                        tags$head(tags$style(HTML(
+                          "label { font-size:16px;  margin-top: 
+                        20px;  margin-bottom: 0px;}"))),
+                        tags$head(tags$style("h5{
+                                 font-size: 21px;
+                                 margin-bottom: 50px;
+                                 margin-top: -20px;
+                                 font-weight:bold}")),
+                        tags$head(tags$style("herg{
+                                 font-size: 21px;
+                                 font-weight:bold;
+                                 color:rgba(246,76,114,1);")),
+                        tags$head(tags$style("hfett{
+                                 font-size: 21px;
+                                 font-weight:bold;
+                                 color:#213a8f;")),
+                        tags$head(tags$style("h6{
+                                 font-size: 16px;
+                                 margin-bottom: -30px;
+                                 margin-top: 30px;
+                                 font-weight:normal;
+                                 line-height: 1.4;}")),
+                        tags$head(tags$style("hred{
+                                 font-size: 16px;
+                                 font-weight:normal;
+                                 line-height: 1.4;}")),
+                        #tags$head(tags$style(".shiny-html-output{height:auto !important;}")),
+                        tags$head(tags$style("h7{
+                                 font-size: 16px;
+                                 margin-bottom: -30px;
+                                 margin-top: 30px;
+                                 font-weight:bold;
+                                 line-height: 1.4;}")),
+                        tags$head(tags$style("h1{
+                                 font-size: 16px;
+                                 margin-bottom: 10px;
+                                 margin-top: -30px;
+                                 font-weight:normal;
+                                 line-height: 1.4;}")),
+                        tags$style(HTML("
+    .tabbable > .nav > li > a                  {background-color: rgba(246,76,114,0.3);  color:black}
+    .tabbable > .nav > li > a[data-value='t1'] {background-color: red;   color:white}
+    .tabbable > .nav > li > a[data-value='t2'] {background-color: blue;  color:white}
+    .tabbable > .nav > li > a[data-value='t3'] {background-color: green; color:white}
+    .tabbable > .nav > li[class=active]    > a {background-color: rgb(246,76,114); color:white}
+  ")),
+                        tags$head(tags$style("h2{
+                                 font-size: 18px;
+                                 margin-bottom: 20px;
+                                 margin-top: 40px;}")),
+                        tags$head(tags$style("hexp{
+                                 font-size: 18px;
+                                 margin-bottom: 20px;
+                                 margin-top: 40px;}")),
+                        tags$head(tags$style(HTML('textarea{font-size: 50px;}'))),
+                        tags$head(tags$style(
+                          HTML('
+         #sidebar {
+            background-color: rgba(100,185,230, 0.6);
+        }')
+                        )),  tags$style(HTML('.irs-grid-text { font-size: 18pt; } .js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
+                                                  background: #000069;
+                                                  border-top: 1px solid #000039 ;
+                                                  border-bottom: 1px solid #000039 ;}
+
+                            /* changes the colour of the number tags */
+                           .irs-from, .irs-to, .irs-single { background: #000069 }')),
+                        
+                        
+                        titlePanel("  "),
+                        HTML(
+                          paste(
+                            h1(" "),'<br/>'
+                          )
+                        ),
+                        chooseSliderSkin("Modern"),
+                        sidebarLayout(
+                          
+                          sidebarPanel(id="sidebar",textAreaInput("caption", HTML(paste("<h5> <b> Text Eingabe </b> <h5>","<h1> Mit diesem Tool können Sie Wörter oder Sätze identifizieren, die für manche Leser schwer zu verstehen sind. Um mehr über unsere Methodik zu lernen können sie <a href='https://citylab-berlin.org/de/start/'><b>diesen Blogpost</b></a> lesen. <b> </br> </br> Hier können Sie einen kopierten Text einfügen: </b>  </br> </br>")), placeholder='Bitte geben Sie hier einen Text ein.',height =300),actionButton("klick","   Text überprüfen",icon("edit"), 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 style="font-size: 14pt; color: #fff; background-color: #213a8f; border-color: #213a8f; margin-bottom: 5px; margin-top: 10px;"),width = "100%",
+                          ),
+                          
+                          mainPanel(tabsetPanel(
+                            #htmlOutput("value",height =300),width = "100%"
+                            tabPanel(h4("Sprachniveau"), inline = T,HTML(
+                              paste("<h6> Dieses Tool bewertet das Sprachniveau aller Wörter in einem Text. Anhand der Vokabellisten des <i>Goethe-Instituts</i> identifizieren wir, <hred style=' color: #f73e67'> <b> welche Wörter in den Lehrplänen A1 (Einsteiger), A2 (Grundlagen) oder B1 (Mittelstufe) enthalten sind</b></hred>. Sie können das Sprachniveau des Lesers im Schieberegler unten auswählen. <hred style=' color: #213a8f'> <b> Fett markierte Wörter</b></hred> fehlen im ausgewählten Vokabular der Sprachstufe und können für einige Leser möglicherweise schwer zu verstehen sein. <br/> <br/> <h6> Die Wortschatzen des <i>Goethe-Institut</i> sind <a href='https://www.sprachenzentrum.fu-berlin.de/slz/sprachen-links/deutsch/wortschatz/index.html'><b>hier</b></a> verfügbar.")
+                            ), fluidRow(column(8, align="center", offset = 2,pickerInput("select", label = HTML(paste("<h6> </h6> <h2> Sprachniveau des Lesers </br> </br> ")), 
+                                                                                         choices = list("A1 - Einsteiger" = 1, "A2 - Grundlagen" = 2, "B1 - Mittelstufe" = 3), 
+                                                                                         selected = 3, choicesOpt = list(
+                                                                                           content = c("<div style='font-weight: bold; color: #f73e67; font-size: 120%;'>A1 - Einsteiger</div>","<div style='font-weight: bold; color: #f73e67; font-size: 120%;'>A2 - Grundlagen</div>","<div style='font-weight: bold; color: #f73e67; font-size: 120%;'>B1 - Mittelstufe</div>"))))),HTML(paste(
+                                                                                             '<br/>',"<herg> Ergebnisse </herg>",'<br/>'
+                                                                                           )),htmlOutput("value",height =300)),
+                            #tabPanel("Vocabulary level",htmlOutput("value1",height =300)),
+                            tabPanel(h4("Wortlänge"),inline = T,HTML(
+                              "<h6> Dieses Tool erkennt <hred style=' color: #f73e67'> <b>die Anzahl der Buchstaben in jedem Wort</b></hred>. Sie können die gewünschte maximale Anzahl von Buchstaben im Schieberegler unten auswählen.<hred style=' color: #213a8f'> <b> Fett markierte Wörter</b></hred> sind länger als die ausgewählte maximale Wörtelänge und können für einige Leser möglicherweise schwer zu verstehen sein. </h6>"),fluidRow(column(8, align="center", offset = 2,knobInput("slider1", label = HTML(paste(h2("Maximale Buchstaben pro Wort"),' <br> ')), min = 0, 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     max = 20, value = 10,  displayPrevious = TRUE, 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     lineCap = "round",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     fgColor = "#f64c72",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     inputColor = "#f64c72"))),HTML(paste('<br/>',
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          "<herg> Ergebnisse </herg>"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     )),htmlOutput("value2",height =300)),
+                            tabPanel(h4("Satzlänge"),inline = T,HTML(
+                              "<h6> Dieses Tool erkennt <hred style=' color: #f73e67'><b> die Anzahl der Wörte in jedem Satz</b></hred>. Sie können die gewünschte maximale Anzahl von Wörtern im Schieberegler unten auswählen. <hred style=' color: #213a8f'> <b> Fett markierte Sätze</b></hred> sind länger als die ausgewählte maximale Sätzelänge und können für einige Leser möglicherweise schwer zu verstehen sein. </h6>"),fluidRow(
+                                column(8, align="center", offset = 2,knobInput("slider2", label = HTML(paste(h2("Maximale Wörte pro Satz"),' <br> ')), min = 0, 
+                                                                               max = 60, value = 30,  displayPrevious = TRUE, 
+                                                                               lineCap = "round",
+                                                                               fgColor = "#f64c72",
+                                                                               inputColor = "#f64c72"))),materialSwitch("checkbox1", label = "Jeden Satz auf einer neuen Zeile", value = F),HTML(paste(
+                                                                                 "<herg> Ergebnisse </herg>"
+                                                                               )),htmlOutput("value3",height =300)),
+                            tabPanel(h4("Kommatas"),inline = T,HTML(
+                              "<h6> Dieses Tool erkennt<hred style=' color: #f73e67'><b> die Anzahl der Kommatas in jedem Satz</b></hred>. Sie können die gewünschte maximale Anzahl von Kommas im Schieberegler unten auswählen. <hred style=' color: #213a8f'> <b> Fett markierte Sätze</b></hred> haben mehr als die ausgewählte maximale Kommata Anzahl und können für einige Leser möglicherweise schwer zu verstehen sein.</h6> "
+                            ),fluidRow(column(8, align="center", offset = 2,knobInput("slider3", label = HTML(paste(h2("Maximale Kommatas pro Satz"),' <br> ')), min = 0, 
+                                                                                      max = 5, value = 3,  displayPrevious = TRUE, 
+                                                                                      lineCap = "round",
+                                                                                      fgColor = "#f64c72",
+                                                                                      inputColor = "#f64c72"))),  materialSwitch("checkbox2", label = "Jeden Satz auf einer neuen Zeile", value = F),HTML(paste(
+                                                                                        "<herg> Ergebnisse </herg>"
+                                                                                      )),htmlOutput("value4",height =300))),width = "1000px"
+                            
+                            
+                          )
+                        )
+) )
+
+
+# You can access the value of the widget with input$file, e.g.
+
+#reactive({df_words <- as.data.frame(strsplit(as.character(input$caption), split = " "))
+#colnames(df_words)[1] <- "word"})
+
+
+server <- function(input, output) {
+  
+  #output$value <- renderText({ paste0(input$caption,"banana") })
+  output$value <- renderText({
+    
+    
+    
+    validate(
+      need(input$caption, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    validate(
+      need(input$klick, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    
+    
+    sel_niveau <- input$select
+    
+    if (sel_niveau==3) {
+      dict_stems_sub1 <- dict_stems[dict_stems$level=="A1" | dict_stems$level=="A2" | dict_stems$level=="B1",]
+      
+    }
+    
+    if (sel_niveau==2) {
+      dict_stems_sub1 <- dict_stems[dict_stems$level=="A1" | dict_stems$level=="A2",]
+    }
+    
+    if (sel_niveau==1) {
+      dict_stems_sub1 <- dict_stems[dict_stems$level=="A1",]
+    }  
+    
+    
+    #df_words <- as.data.frame(as.character(read_rtf("/Users/evelynebrie/Dropbox/CityLab/Projects/TextSimplification/Prototype/Input.rtf")))
+    
+    # if (!is.null(input$file)) {
+    # #df_words <- as.data.frame(as.character(read_rtf(str(input$file))))
+    # #df_words <- as.data.frame(strsplit(input$file), split = " ")
+    # #file_input <- as.data.frame(read_rtf(input$file))
+    # df_words <- as.data.frame(read_rtf(input$file))
+    # 
+    # #colnames(file_input)[1] <- "text"
+    # #df_words <- as.data.frame(strsplit(file_input$text, split = " "))
+    # }  
+    
+    
+    
+    if (!is.null(input$caption)) {
+      df_words <- as.data.frame(strsplit(input$caption, split = " "))
+    }  
+    
+    #df_words <- as.data.frame(strsplit(input$caption, split = " "))
+    
+    colnames(df_words)[1] <- "word"
+    
+    
+    df_words$wordraw <- df_words$word
+    
+    # Remove all punctuations (NAs are punctuations---keeeping them included for web-implementation)
+    df_words$word <- gsub('[[:punct:] ]+','',df_words$word)
+    
+    # Make all words lowercase
+    df_words$word <- tolower(df_words$word)
+    
+    # Make stemmed version of each word
+    df_words$stem <- NA
+    df_words$stem <- as.character(text_tokens(df_words$word, stemmer = "german")) # english stemmer
+    
+    # Add marker of word location
+    df_words$location <- NA
+    df_words$location <- seq(1,dim(df_words)[1])
+    
+    # Add letter count 
+    df_words$nb_letters <- NA
+    df_words$nb_letters <- nchar(df_words$word)
+    
+    # Add word complexity dummy variable (all 0s for now)
+    df_words$komplex <- NA
+    df_words$komplex <- ifelse(df_words$stem %in% dict_stems_sub1$stem,
+                               0,
+                               1)
+    df_words$komplex <- ifelse(nchar(df_words$word) < 4,
+                               0,
+                               df_words$komplex)
+    
+    numbers_only <- function(x) !grepl("\\D", x)
+    
+    df_words$komplex <- ifelse(numbers_only(df_words$word) == T,
+                               0,
+                               df_words$komplex)
+    
+    
+    #sel_niveau[sel_niveau==1] <- "A1"
+    #sel_niveau[sel_niveau==2] <- "A2"
+    #sel_niveau[sel_niveau==3] <- "B1"
+    
+    df_words <- left_join(df_words,dict_stems_sub1,by="stem")
+    
+    df_words <- df_words[df_words$stem!="character(0)",]
+    
+    df_words$level <- ifelse(numbers_only(df_words$word) == T,
+                             "Other (number)",
+                             df_words$level)
+    
+    df_words$level <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                             "Other (Website)",
+                             df_words$level)
+    df_words$komplex <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                               0,
+                               df_words$komplex)
+    
+    df_words$level <- ifelse(nchar(df_words$word) < 3,
+                             "Other (1-2 characters)",
+                             df_words$level)
+    
+    df_words$level<- ifelse(df_words$komplex == 1,
+                            "Komplex",
+                            df_words$level)
+    
+    #paste0(df_words$wordraw,"<b> (", df_words$level, ") </b>")
+    
+    
+    
+    
+    
+    # print(ifelse(sel_niveau==3,
+    #         df_words$wordraw,
+    #         paste0("<b style='color:#2f87c1 !important;'>", df_words$wordraw," </b>")
+    # ))
+    
+    
+    
+    print(ifelse(df_words$komplex!=1,
+                 df_words$wordraw,
+                 paste0("<b style='color:#213a8f !important;'>", df_words$wordraw," </b>")))
+    
+  })
+  
+  
+  
+  
+  
+  
+  #output$value <- renderText({ paste0(input$caption,"banana") })
+  output$value1 <- renderText({ 
+    
+    validate(
+      need(input$klick, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    validate(
+      need(input$caption, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    df_words <- as.data.frame(strsplit(input$caption, split = " "))
+    
+    colnames(df_words)[1] <- "word"
+    
+    df_words$wordraw <- df_words$word
+    
+    # Remove all punctuations (NAs are punctuations---keeeping them included for web-implementation)
+    df_words$word <- gsub('[[:punct:] ]+','',df_words$word)
+    
+    # Make all words lowercase
+    df_words$word <- tolower(df_words$word)
+    
+    # Make stemmed version of each word
+    df_words$stem <- NA
+    df_words$stem <- as.character(text_tokens(df_words$word, stemmer = "german")) # english stemmer
+    
+    # Add marker of word location
+    df_words$location <- NA
+    df_words$location <- seq(1,dim(df_words)[1])
+    
+    # Add letter count 
+    df_words$nb_letters <- NA
+    df_words$nb_letters <- nchar(df_words$word)
+    
+    # Add word complexity dummy variable (all 0s for now)
+    df_words$komplex <- NA
+    df_words$komplex <- ifelse(df_words$stem %in% dict_stems$stem,
+                               0,
+                               1)
+    df_words$komplex <- ifelse(nchar(df_words$word) < 4,
+                               0,
+                               df_words$komplex)
+    
+    numbers_only <- function(x) !grepl("\\D", x)
+    
+    df_words$komplex <- ifelse(numbers_only(df_words$word) == T,
+                               0,
+                               df_words$komplex)
+    
+    
+    df_words <- left_join(df_words,dict_stems,by="stem")
+    
+    df_words <- df_words[df_words$stem!="character(0)",]
+    
+    df_words$level <- ifelse(numbers_only(df_words$word) == T,
+                             "Other (number)",
+                             df_words$level)
+    
+    df_words$level <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                             "Other (Website)",
+                             df_words$level)
+    df_words$komplex <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                               0,
+                               df_words$komplex)
+    
+    df_words$level <- ifelse(nchar(df_words$word) < 3,
+                             "Other (1-2 characters)",
+                             df_words$level)
+    
+    df_words$level<- ifelse(df_words$komplex == 1,
+                            "Komplex",
+                            df_words$level)
+    
+    #paste0(df_words$wordraw,"<b> (", df_words$level, ") </b>")
+    
+    df_words$color <- "black"
+    df_words$color[df_words$level=="A1"] <- "#59981A"
+    df_words$color[df_words$level=="A2"] <- "#ed9f0e"
+    df_words$color[df_words$level=="B1"] <- "#d90f0f"
+    
+    df_words$level[is.na(df_words$level)] <-"Other"
+    
+    print(ifelse(df_words$level=="A1" | df_words$level=="A2" | df_words$level=="B1",
+                 paste0("<b style='color:",df_words$color," !important;'>", df_words$wordraw," </b>"),
+                 df_words$wordraw))
+  })
+  
+  
+  
+  #output$value <- renderText({ paste0(input$caption,"banana") })
+  output$value2 <- renderText({ 
+    
+    validate(
+      need(input$klick, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    validate(
+      need(input$caption, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    df_words <- as.data.frame(strsplit(input$caption, split = " "))
+    colnames(df_words)[1] <- "word"
+    
+    df_words$wordraw <- df_words$word
+    
+    # Remove all punctuations (NAs are punctuations---keeeping them included for web-implementation)
+    df_words$word <- gsub('[[:punct:] ]+','',df_words$word)
+    
+    # Make all words lowercase
+    df_words$word <- tolower(df_words$word)
+    
+    # Make stemmed version of each word
+    df_words$stem <- NA
+    df_words$stem <- as.character(text_tokens(df_words$word, stemmer = "german")) # english stemmer
+    
+    # Add marker of word location
+    df_words$location <- NA
+    df_words$location <- seq(1,dim(df_words)[1])
+    
+    # Add letter count 
+    df_words$nb_letters <- NA
+    df_words$nb_letters <- nchar(df_words$word)
+    
+    # Add word complexity dummy variable (all 0s for now)
+    df_words$komplex <- NA
+    df_words$komplex <- ifelse(df_words$stem %in% dict_stems$stem,
+                               0,
+                               1)
+    df_words$komplex <- ifelse(nchar(df_words$word) < 4,
+                               0,
+                               df_words$komplex)
+    
+    numbers_only <- function(x) !grepl("\\D", x)
+    
+    df_words$komplex <- ifelse(numbers_only(df_words$word) == T,
+                               0,
+                               df_words$komplex)
+    
+    
+    df_words <- left_join(df_words,dict_stems,by="stem")
+    
+    df_words <- df_words[df_words$stem!="character(0)",]
+    
+    df_words$level <- ifelse(numbers_only(df_words$word) == T,
+                             "Other (number)",
+                             df_words$level)
+    
+    df_words$level <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                             "Other (Website)",
+                             df_words$level)
+    df_words$komplex <- ifelse(grepl("www", df_words$word, fixed = TRUE) == T,
+                               0,
+                               df_words$komplex)
+    
+    df_words$level <- ifelse(nchar(df_words$word) < 3,
+                             "Other (1-2 characters)",
+                             df_words$level)
+    
+    df_words$level<- ifelse(df_words$komplex == 1,
+                            "Komplex",
+                            df_words$level)
+    
+    #paste0(df_words$wordraw,"<b> (", df_words$level, ") </b>")
+    nb_letters <- input$slider1
+    
+    
+    print(ifelse(df_words$nb_letters<(nb_letters+1),
+                 df_words$wordraw,
+                 paste0("<b style='color:#213a8f !important;'>", df_words$wordraw,"</b> <b style='color:rgba(246,76,114,1) !important;'> (",df_words$nb_letters," Buchstaben) </b>")))
+  })
+  
+  
+  
+  
+  #output$value <- renderText({ paste0(input$caption,"banana") })
+  output$value3 <- renderText({ 
+    
+    validate(
+      need(input$klick, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    validate(
+      need(input$caption, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    
+    # Create a data frame with sentences as observations (separator = ". [A-Z]")
+    df_sentences <- as.data.frame(strsplit(input$caption, split = "\\.\\s(?=[A-Z])",perl=T))
+    colnames(df_sentences)[1] <- "sentence"
+    
+    # df_sentences$sentence <- ifelse(grepl('\\.$', df_sentences$sentence)==T,
+    #                                 df_sentences$sentence,
+    #                                 paste0(df_sentences$sentence,"."))
+    
+    
+    df_sentences$sentence <- ifelse(grepl('\\.$', df_sentences$sentence)==T,
+                                    df_sentences$sentence,
+                                    ifelse(df_sentences$sentence==tail(df_sentences$sentence,1),
+                                           df_sentences$sentence,
+                                           paste0(df_sentences$sentence,".")))
+    
+    
+    # Add marker of sentence location
+    df_sentences$location <- NA
+    df_sentences$location <- seq(1,dim(df_sentences)[1])
+    
+    # Add word count 
+    df_sentences$nb_words <- NA
+    df_sentences$nb_words <- str_count(df_sentences$sentence,"\\w+")
+    
+    # Add comma count 
+    df_sentences$nb_commas <- NA
+    df_sentences$nb_commas <- str_count(df_sentences$sentence,",")
+    
+    #paste0(df_words$wordraw,"<b> (", df_words$level, ") </b>")
+    
+    nb_words <- input$slider2
+    
+    if(input$checkbox1==T){
+      df_sentences$sentence <- paste0("<br> <br>",df_sentences$sentence)
+      df_sentences$sentence[1]<- gsub("<br> <br>","",df_sentences$sentence[1])
+    }
+    
+    print(ifelse(df_sentences$nb_words<(nb_words+1),
+                 df_sentences$sentence,
+                 paste0("<b style='color:#213a8f !important;'>", df_sentences$sentence,"</b> <b style='color:rgba(246,76,114,1) !important;'> (",df_sentences$nb_words," Wörte) </b>")))
+  })
+  
+  
+  
+  #output$value <- renderText({ paste0(input$caption,"banana") })
+  output$value4 <- renderText({ 
+    
+    validate(
+      need(input$klick, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    
+    validate(
+      need(input$caption, 'Bitte geben Sie hier Ihren Text ein und klicken Sie auf "Text überprüfen". Ihre Ergebnisse werden hier angezeigt.')
+    )
+    # Create a data frame with sentences as observations (separator = ". [A-Z]")
+    
+    # df_sentences <- ifelse(is.null(input$caption)==T,
+    #                        as.data.frame(strsplit(input$caption, split = "\\.\\s(?=[A-Z])",perl=T)),
+    #                        as.data.frame(strsplit("Please insert text.", split = "\\.\\s(?=[A-Z])",perl=T)))
+    #        
+    
+    df_sentences <- as.data.frame(strsplit(input$caption, split = "\\.\\s(?=[A-Z])",perl=T))
+    
+    colnames(df_sentences)[1] <- "sentence"
+    
+    
+    df_sentences$sentence <- ifelse(grepl('\\.$', df_sentences$sentence)==T,
+                                    df_sentences$sentence,
+                                    ifelse(df_sentences$sentence==tail(df_sentences$sentence,1),
+                                           df_sentences$sentence,
+                                           paste0(df_sentences$sentence,".")))
+    
+    
+    #df_sentences$sentence <- ifelse(grepl('\\.$', df_sentences$sentence)==T,
+    #                                df_sentences$sentence,
+    #                                df_sentences$sentence)
+    
+    # Add marker of sentence location
+    df_sentences$location <- NA
+    df_sentences$location <- seq(1,dim(df_sentences)[1])
+    
+    # Add word count 
+    df_sentences$nb_words <- NA
+    df_sentences$nb_words <- str_count(df_sentences$sentence,"\\w+")
+    
+    # Add comma count 
+    df_sentences$nb_commas <- NA
+    df_sentences$nb_commas <- str_count(df_sentences$sentence,",")
+    
+    #paste0(df_words$wordraw,"<b> (", df_words$level, ") </b>")
+    
+    df_sentences$sentence <- gsub(",","<b style='color:rgba(246,76,114,1) !important;'>(,)</b>",df_sentences$sentence)
+    
+    nb_commas <- input$slider3
+    
+    #df_sentences$sentence <- gsub("\\. \\.","\\.",df_sentences$sentence)
+    
+    if(input$checkbox2==T){
+      df_sentences$sentence <- paste0("<br> <br>",df_sentences$sentence)
+      df_sentences$sentence[1]<- gsub("<br> <br>","",df_sentences$sentence[1])
+    }
+    
+    
+    print(ifelse(df_sentences$nb_commas<(nb_commas+1),
+                 df_sentences$sentence,
+                 paste0("<b style='color:#213a8f !important;'>",df_sentences$sentence,"</b> <b  style='color:rgba(246,76,114,1) !important;'> (",df_sentences$nb_commas," Kommatas) </b>")))
+    
+    
+    
+    
+  })
+}
+
+shinyApp(ui, server,options = list(height = 2300))
+
+```

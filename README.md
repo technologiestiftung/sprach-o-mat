@@ -19,3 +19,38 @@ The Tool provides 4 different diagnostics:
 
 - Dictionaries: PDF files from the Goethe Institut. Goethe-Zertifikat_A1_Wortliste.pdf (Words list A1), Goethe-Zertifikat_A2_Wortliste.pdf (Words list A2), Goethe-Zertifikat_B1_Wortliste.pdf (Words list B1). These are openly available here: https://www.sprachenzentrum.fu-berlin.de/slz/sprachen-links/deutsch/wortschatz/index.html
 
+
+## Credits
+
+<table>
+  <tr>
+    <td>
+      <a href="https://odis-berlin.de">
+        <br />
+        <br />
+        <img width="200" src="https://logos.citylab-berlin.org/logo-odis-berlin.svg" />
+      </a>
+    </td>
+    <td>
+      Together with: <a href="https://citylab-berlin.org/en/start/">
+        <br />
+        <br />
+        <img width="200" src="https://logos.citylab-berlin.org/logo-citylab-berlin.svg" />
+      </a>
+    </td>
+    <td>
+      A project by: <a href="https://www.technologiestiftung-berlin.de/en/">
+        <br />
+        <br />
+        <img width="150" src="https://logos.citylab-berlin.org/logo-technologiestiftung-berlin-en.svg" />
+      </a>
+    </td>
+    <td>
+      Supported by: <a href="https://www.berlin.de/sen/inneres/">
+        <br />
+        <br />
+        <img width="100" src="https://logos.citylab-berlin.org/logo-berlin-seninnds-en.svg" />
+      </a>
+    </td>
+  </tr>
+</table>
